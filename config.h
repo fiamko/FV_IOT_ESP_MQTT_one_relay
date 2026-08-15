@@ -20,7 +20,7 @@
 // ============================================================================
 // VERZE FIRMWARU
 // ============================================================================
-#define FIRMWARE_VERSION "1.0.5"
+#define FIRMWARE_VERSION "1.0.7"
 
 // ============================================================================
 // GPIO PINY — OVĚŘENO TESTOVACÍM PROGRAMEM 20.7.2026
@@ -35,7 +35,7 @@
 // ONEWIRE — DS18B20 teplotní čidla na GPIO1 (TX pin) — Serial se po setupu vypne
 // ============================================================================
 #define ONEWIRE_PIN     1     // GPIO1 = TX pin — po Serial.end() volný pro OneWire
-#define TEMP_READ_MS    5000  // [ms] interval čtení teplot (5s)
+#define TEMP_READ_MS    20000  // [ms] interval čtení teplot (20s) — delší kvůli stabilitě OneWire
 
 // ============================================================================
 // AKTIVNÍ ÚROVNĚ VÝSTUPŮ — VŠE OVĚŘENO 20.7.2026
@@ -66,7 +66,7 @@
 // JSON klíče — příchozí (z měniče)
 #define JSON_VYKON              "output_apparent_power"       // zdánlivý výkon [W]
 #define JSON_BAT_VYBIJENI       "battery_discharge_current"   // vybíjecí proud bat [A]
-#define JSON_PV_VOLTAGE         "pv_input_voltage"            // napětí z panelů [V]
+#define JSON_PV_VOLTAGE         "pv_voltage"                  // napětí z panelů [V]
 
 // JSON klíče — odchozí (stav — podlaha2200/stav)
 #define JSON_STATUS         "status"    // "ZAP" / "OFF"
@@ -87,6 +87,10 @@
 // OVERRIDE — ochrana baterie
 #define DEFAULT_VYBIJENI_BAT     20      // [A]  max. vybíjecí proud baterie
 
+// REZERVA — proaktivní kontrola volného výkonu měniče před zapnutím
+#define DEFAULT_HEADROOM_LIMIT   3600    // [W]  max. výkon hlavního měniče (štítek)
+#define PODLAHOVKA_POWER         2200.0  // [W]  odběr podlahovky (kotle)
+
 // INTELLIGENCE — PV napětí
 #define DEFAULT_MIN_PV_VOLTAGE   120.0   // [V]  min. napětí panelů (pod touto mezí → vypnout)
 
@@ -96,7 +100,7 @@
 // GPS — pro výpočet západu slunce
 #define DEFAULT_LATITUDE         49.5    // [°N] ČR
 #define DEFAULT_LONGITUDE        16.5    // [°E] ČR
-#define DEFAULT_UTC_OFFSET       1       // [h]  CET (zimní čas), +2 pro letní
+#define DEFAULT_UTC_OFFSET       2       // [h]  CEST (letní čas), +1 pro zimní
 
 // HYSTEREZE — minimální doba ve stavu
 #define DEFAULT_HYST_ZAPNUTO     20      // [s]  min. doba v zapnutém stavu
@@ -110,7 +114,7 @@
 // ============================================================================
 #define WEB_PORT          80
 #define WEB_USERNAME      "admin"
-#define DEFAULT_WEB_PASS   "zmenit"   // heslo pro web
+#define DEFAULT_WEB_PASS   "2330"   // heslo pro web
 
 // ============================================================================
 // ČASOVÁNÍ (ms)

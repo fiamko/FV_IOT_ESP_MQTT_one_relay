@@ -155,41 +155,20 @@ void sensors_loop() {
         if (t2 <= -127.0) { err = true; } else { g_sensors.teplota_vystup = t2; }
         g_sensors.teplota_error = err;
 
-        if (!err) {
-            Serial.print(F("DS18B20: vstup="));
-            Serial.print(g_sensors.teplota_vstup, 1);
-            Serial.print(F("°C, vystup="));
-            Serial.print(g_sensors.teplota_vystup, 1);
-            Serial.println(F("°C"));
-        }
+            // Serial výstup po Serial.end() zakázán — ruší OneWire na GPIO1
     }
 }
 
 void sensors_scan() {
-    Serial.println(F("--- DS18B20 RAW ONEWIRE SKEN ---"));
+    // Sériový výstup nedostupný — Serial.end() v setupu
+    // Pro diagnostiku použij webovou stránku ESP (zobrazuje teploty a chybový stav)
 
     DeviceAddress a1, a2;
     int count = scan_bus(&a1, &a2);
 
-    for (int i = 0; i < count && i < 2; i++) {
-        DeviceAddress* a = (i == 0) ? &a1 : &a2;
-        Serial.print(F("  Cidlo #")); Serial.print(i + 1); Serial.print(F(": "));
-        for (int j = 0; j < 8; j++) {
-            if ((*a)[j] < 0x10) Serial.print("0");
-            Serial.print((*a)[j], HEX);
-            if (j < 7) Serial.print(":");
-        }
-        Serial.println();
-    }
-
-    Serial.print(F("Celkem nalezeno: ")); Serial.print(count); Serial.println(F(" cidel."));
-
     if (count == 0) {
-        Serial.println(F("Zkontroluj:"));
-        Serial.println(F("  1. Napajeni 3.3V mezi VCC a GND"));
-        Serial.println(F("  2. Pull-up 4.7kΩ mezi DATA a 3.3V"));
-        Serial.print(F("  3. DATA na GPIO")); Serial.print(ONEWIRE_PIN);
-        Serial.println(F(" (TX pin - po Serial.end() volny pro OneWire)"));
+        // Bez sériového výstupu nelze diagnostikovat — nastav chybový příznak
+        g_sensors.teplota_error = true;
     } else {
         // Ulož nalezené adresy a reinicializuj
         if (count >= 1) { memcpy(s_addr1, a1, 8); save_address("ds18_a1", a1); s_valid1 = true; }
@@ -197,8 +176,6 @@ void sensors_scan() {
         s_active_count = count;
         g_sensors.teplota_error = (count < 2);
         g_dallas.begin();
-        Serial.println(F("Cidla ulozena do Preferences. Restart neni nutny."));
     }
 
-    Serial.println(F("--- KONEC SKENU ---"));
 }

@@ -127,9 +127,14 @@ static String generate_html(const char* message = nullptr) {
     h += String(g_settings.max_vykon);
     h += F("'>"
 
-           "<label>OCHRANA — Max. vybíjení bat [A]:</label>"
-           "<input name='vybijeni_bat' type='number' min='1' max='200' value='");
+            "<label>OCHRANA — Max. vybíjení bat [A]:</label>"
+            "<input name='vybijeni_bat' type='number' min='1' max='200' value='");
     h += String(g_settings.vybijeni_bat);
+    h += F("'>"
+
+            "<label>REZERVA — Max. výkon měniče [W]:</label>"
+            "<input name='headroom_limit' type='number' min='100' max='20000' value='");
+    h += String(g_settings.headroom_limit);
     h += F("'>"
 
            "<label>INTELLIGENCE — Min. PV napětí [V]:</label>"
@@ -177,7 +182,7 @@ static String generate_html(const char* message = nullptr) {
 
            "<input type='submit' value='💾 Uložit nastavení'></form></div>");
 
-    h += F("<div class='version'>FW: 1.0.2 | ESP32-podlahovka2200</div>");
+    h += F("<div class='version'>FW: " FIRMWARE_VERSION " | ESP32-podlahovka2200</div>");
     h += F("<script>"
            "function cof(e,c){e.className='value '+(c?'on':'off')}"
            "function poll(){var x=new XMLHttpRequest();x.open('GET','/api/status',true);"
@@ -266,6 +271,10 @@ static void handle_save() {
     if (s_web_server->hasArg("vybijeni_bat")) {
         g_settings.vybijeni_bat = s_web_server->arg("vybijeni_bat").toInt();
         g_prefs.putInt("vybijeni_bat", g_settings.vybijeni_bat);
+    }
+    if (s_web_server->hasArg("headroom_limit")) {
+        g_settings.headroom_limit = s_web_server->arg("headroom_limit").toInt();
+        g_prefs.putInt("headroom", g_settings.headroom_limit);
     }
     if (s_web_server->hasArg("min_pv_voltage")) {
         g_settings.min_pv_voltage = s_web_server->arg("min_pv_voltage").toFloat();

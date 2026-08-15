@@ -118,6 +118,19 @@ static bool hystereze_ok(unsigned long now) {
     }
 }
 
+/*
+ * Proaktivní kontrola volné rezervy výkonu hlavního měniče.
+ * Vrací false, pokud by připojení podlahovky (PODLAHOVKA_POWER) přetížilo
+ * měnič nad headroom_limit. Bez dat z měniče neomezuje (true).
+ */
+static bool has_headroom() {
+    if (g_menic.last_update_ms == 0) return true;  // zatím žádná data → neomezovat
+    if (g_settings.headroom_limit <= 0) return true;
+    float load = g_menic.output_apparent_power;
+    if (load + PODLAHOVKA_POWER > g_settings.headroom_limit) return false;
+    return true;
+}
+
 // ============================================================================
 // VEŘEJNÉ FUNKCE
 // ============================================================================
@@ -177,15 +190,19 @@ void relay_control_loop() {
 
         // -----------------------------------------------------------------
         case PS_OFF:
-            if (g_podlahovka_enabled && !override && hystereze_ok(now)) {
+            if (g_podlahovka_enabled && !override && hystereze_ok(now) && has_headroom()) {
                 set_relay(true);
                 g_podlahovka_state = PS_ACTIVE;
                 g_relay.reason = RelayState::MQTT_ON;
                 Serial.println(F("Relé: ACTIVE — zapnuto řízením."));
+            } else if (g_podlahovka_enabled && !override && hystereze_ok(now) && !has_headroom()) {
+                g_relay.reason = RelayState::HEADROOM;  // nedostatek volného výkonu měniče
             } else if (g_podlahovka_enabled && override) {
                 g_relay.reason = override_reason;
             } else if (g_podlahovka_enabled && !hystereze_ok(now)) {
                 g_relay.reason = RelayState::MQTT_ON;  // čeká na hysterezi
+            } else if (override) {
+                g_relay.reason = override_reason;  // soumrak/přetížení i když OPI nechce
             } else {
                 g_relay.reason = RelayState::MQTT_OFF;
             }
@@ -295,6 +312,7 @@ const char* relay_reason_str() {
         case RelayState::MQTT_OFF:           return "Vypnuto rizenim";
         case RelayState::OVERRIDE_POWER:     return "Pretizeny menic";
         case RelayState::OVERRIDE_BAT:       return "Zatez baterie";
+        case RelayState::HEADROOM:           return "Nedostatecna rezerva";
         case RelayState::INTELLIGENCE_PV:    return "Nizke PV napeti";
         case RelayState::INTELLIGENCE_SUNSET:return "Zapad slunce";
         case RelayState::SAFETY_OFF:         return "Ztrata spojeni";

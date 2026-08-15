@@ -75,6 +75,7 @@ struct RelayState {
         MQTT_OFF,
         OVERRIDE_POWER,
         OVERRIDE_BAT,
+        HEADROOM,
         INTELLIGENCE_PV,
         INTELLIGENCE_SUNSET,
         SAFETY_OFF,
@@ -146,6 +147,10 @@ struct Settings {
 
     // [ZAPISUJE: web_setup] [ČTE: relay_control] [A]
     int vybijeni_bat;
+
+    // [ZAPISUJE: web_setup] [ČTE: relay_control] [W]
+    // Max. výkon hlavního měniče pro proaktivní kontrolu rezervy před zapnutím
+    int headroom_limit;
 
     // [ZAPISUJE: web_setup] [ČTE: relay_control] [V]
     float min_pv_voltage;

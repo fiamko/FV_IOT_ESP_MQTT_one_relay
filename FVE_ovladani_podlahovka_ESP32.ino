@@ -1,5 +1,5 @@
 /*
- * FVE_ovladani_podlahovka_ESP32.ino — v1.0.5 (sensory DS18B20 na GPIO1/TX, Serial.end() po setupu)
+ * FVE_ovladani_podlahovka_ESP32.ino — v1.0.6 (oprava OneWire rušení, noční klid do půlnoci)
  */
 #include "variables.h"
 #include "wifi_manager.h"
@@ -31,6 +31,7 @@ static void load_settings() {
     g_settings.mqtt_timeout   = g_prefs.getInt("mqtt_timeout", DEFAULT_MQTT_TIMEOUT);
     g_settings.max_vykon      = g_prefs.getInt("max_vykon", DEFAULT_MAX_VYKON);
     g_settings.vybijeni_bat   = g_prefs.getInt("vybijeni_bat", DEFAULT_VYBIJENI_BAT);
+    g_settings.headroom_limit = g_prefs.getInt("headroom", DEFAULT_HEADROOM_LIMIT);
     g_settings.min_pv_voltage = g_prefs.getFloat("min_pv_v", DEFAULT_MIN_PV_VOLTAGE);
     g_settings.sunset_offset  = g_prefs.getInt("sunset_off", DEFAULT_SUNSET_OFFSET);
     g_settings.latitude       = g_prefs.getFloat("lat", DEFAULT_LATITUDE);

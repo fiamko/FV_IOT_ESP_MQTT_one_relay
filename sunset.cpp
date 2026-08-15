@@ -142,7 +142,6 @@ static void ntp_sync() {
     if (!s_ntp_configured) {
         configTime(g_settings.utc_offset * 3600, 0, NTP_SERVER, "time.nist.gov");
         s_ntp_configured = true;
-        Serial.println(F("NTP: konfigurace provedena."));
     }
 
     // Počkáme max. 3 sekundy na synchronizaci
@@ -157,7 +156,6 @@ static void ntp_sync() {
         g_sunset.time_valid = true;
     } else {
         g_sunset.time_valid = false;
-        Serial.println(F("NTP: selhala synchronizace."));
     }
 }
 
@@ -171,8 +169,6 @@ void sunset_init() {
     g_sunset.time_valid = false;
     g_sunset.is_sunset_window = false;
     s_ntp_configured = false;
-
-    Serial.println(F("Sunset: inicializován (čekám na NTP)."));
 }
 
 void sunset_loop() {
@@ -201,20 +197,17 @@ void sunset_loop() {
             if (sh != g_sunset.sunset_hour || sm != g_sunset.sunset_minute) {
                 g_sunset.sunset_hour = sh;
                 g_sunset.sunset_minute = sm;
-                Serial.print(F("Sunset: dnes v "));
-                Serial.print(sh);
-                Serial.print(F(":"));
-                if (sm < 10) Serial.print('0');
-                Serial.println(sm);
             }
 
-            // Vyhodnocení sunset okna
+            // Vyhodnocení sunset okna — od (západ - offset) DO ZÁPADU SLUNCE
             int now_minutes = timeinfo.tm_hour * 60 + timeinfo.tm_min;
             int sunset_minutes = sh * 60 + sm;
             int threshold_minutes = sunset_minutes - g_settings.sunset_offset;
 
+            // Okno: od threshold_minutes do západu
+            // Po západu okno zhasne = signalizace že západ už proběhl
             g_sunset.is_sunset_window = (now_minutes >= threshold_minutes &&
-                                         now_minutes < sunset_minutes);
+                                          now_minutes < sunset_minutes);
 
             s_last_sunset_calc = now;
         }
